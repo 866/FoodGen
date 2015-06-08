@@ -5,16 +5,23 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT       += core sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = FoodGen
 TEMPLATE = app
 
+CONFIG += c++11
 
 SOURCES += main.cpp\
-        fgmain.cpp
+        fgmain.cpp \
+    dataworker.cpp \
+    foodeditor.cpp
 
-HEADERS  += fgmain.h
+HEADERS  += fgmain.h \
+    dataworker.h \
+    foodeditor.h
 
-FORMS    += fgmain.ui
+FORMS    += fgmain.ui \
+    foodeditor.ui
