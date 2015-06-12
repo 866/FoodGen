@@ -43,22 +43,20 @@ FoodEditor::FoodEditor(const Dishes& dishes, QWidget *parent) :
     ui->chosenDishes->sortItems(Qt::SortOrder::AscendingOrder);
 }
 
-void FoodEditor::addDishToTable(const QString& name, const DishChars& dishc)
-{
+void FoodEditor::addDishToTable(const QString& name, const DishChars& dishc) { // Adds new cells to the table
     userChanges = false;
     ui->tableDishes->insertRow(0);
     ui->tableDishes->setItem(0, 0, new QTableWidgetItem(name));
     ui->tableDishes->setItem(0, 1, new QTableWidgetItem(QString::number(dishc.rank)));
-    ui->tableDishes->setItem(0, 2, new QTableWidgetItem(QString::number(dishc.breakfastProb)));
-    ui->tableDishes->setItem(0, 3, new QTableWidgetItem(QString::number(dishc.dinnerProb)));
-    ui->tableDishes->setItem(0, 4, new QTableWidgetItem(QString::number(dishc.supperProb)));
+    ui->tableDishes->setItem(0, 2, new QTableWidgetItem(QString::number(dishc.breakfastRank)));
+    ui->tableDishes->setItem(0, 3, new QTableWidgetItem(QString::number(dishc.dinnerRank)));
+    ui->tableDishes->setItem(0, 4, new QTableWidgetItem(QString::number(dishc.supperRank)));
     userChanges = true;
 }
 
-void FoodEditor::on_addToTable_clicked()
-{
+void FoodEditor::on_addToTable_clicked() { // Adds default dish
     DishChars dishc;
-    addDishToTable("Default", DishChars());
+    addDishToTable("Surprise dish", DishChars());
     ui->tableDishes->sortByColumn(0);
 }
 
@@ -68,22 +66,20 @@ FoodEditor::~FoodEditor()
     delete ui;
 }
 
-void FoodEditor::on_tableDishes_itemSelectionChanged()
-{
+void FoodEditor::on_tableDishes_itemSelectionChanged() { // refreshes last selected item
     int row = ui->tableDishes->currentRow();
     int column = ui->tableDishes->currentColumn();
     lastItem = ui->tableDishes->item(row, column)->text();
 }
 
-int FoodEditor::listContainsItem(const QString& item)
-{
+int FoodEditor::listContainsItem(const QString& item) { // checks whether list contains item
     for(int i=0; i<ui->chosenDishes->count(); ++i)
         if (item == ui->chosenDishes->item(i)->text())
             return i;
     return -1;
 }
 
-int FoodEditor::tableContainsItem(const QString& item)
+int FoodEditor::tableContainsItem(const QString& item) // checks whether table contains item
 {
     for(int i=0; i<ui->tableDishes->rowCount(); ++i)
         if (item == ui->tableDishes->item(i, 0)->text())
@@ -91,7 +87,7 @@ int FoodEditor::tableContainsItem(const QString& item)
     return -1;
 }
 
-void FoodEditor::on_copyButton_clicked()
+void FoodEditor::on_copyButton_clicked() // copies dish from the table to the list
 {
     int currentRow = ui->tableDishes->currentRow();
     if (currentRow == -1) return;
@@ -103,8 +99,7 @@ void FoodEditor::on_copyButton_clicked()
     ui->chosenDishes->sortItems(Qt::SortOrder::AscendingOrder);
 }
 
-void FoodEditor::on_removeFromTable_clicked()
-{
+void FoodEditor::on_removeFromTable_clicked() { // removes item from the table
     int currentRow = ui->tableDishes->currentRow();
     if (currentRow == -1) return;
     QString item_text = ui->tableDishes->item(currentRow, 0)->text();
@@ -119,20 +114,32 @@ void FoodEditor::on_removeFromTable_clicked()
 
 }
 
-void FoodEditor::on_removeFromListButton_clicked()
-{
+void FoodEditor::on_removeFromListButton_clicked() { // removes item from the list
     delete ui->chosenDishes->item(ui->chosenDishes->currentRow());
 }
 
-void FoodEditor::on_tableDishes_cellChanged(int row, int column)
-{
-    if (column == 0 && userChanges)
+void FoodEditor::on_tableDishes_cellChanged(int row, int column) {
+    if (userChanges)
     {
-        int itemToChange = listContainsItem(lastItem);
-        lastItem = ui->tableDishes->item(row, column)->text();
-        if (itemToChange != -1)
-            ui->chosenDishes->item(itemToChange)->setText(lastItem);
-        ui->tableDishes->sortByColumn(0, Qt::SortOrder::AscendingOrder);
+        if (column == 0)
+        {
+            int itemToChange = listContainsItem(lastItem);
+            lastItem = ui->tableDishes->item(row, column)->text();
+            if (itemToChange != -1)
+                ui->chosenDishes->item(itemToChange)->setText(lastItem);
+            ui->tableDishes->sortByColumn(0, Qt::SortOrder::AscendingOrder);
+        }
+        else
+        {
+            QString cellText = ui->tableDishes->item(row, column)->text();
+            bool success = false;
+            int number = cellText.toInt(&success);
+            if ((!success) || (number < 1))
+            {
+                QMessageBox::warning(NULL, "Error", "Enter correct integer value!");
+                ui->tableDishes->item(row, column)->setText("1");
+            }
+        }
     }
 }
 

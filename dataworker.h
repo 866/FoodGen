@@ -10,8 +10,7 @@
 struct DishChars // Dish struct that is the prototype of one food item
 {
     int rank = 1;
-    float overallProb = 1;
-    float breakfastProb=1, dinnerProb=1, supperProb=1;
+    int breakfastRank = 1, dinnerRank = 1, supperRank = 1;
     bool inList = false;
 };
 

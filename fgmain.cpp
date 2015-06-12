@@ -16,16 +16,13 @@ FGmain::FGmain(QWidget *parent) :
     allDishes = loadDishesFromDB();
     ui->setupUi(this);
 
-  /*  auto newAct = new QAction(QIcon(":/images/new.png"), tr("&New"), this);
-    newAct->setShortcuts(QKeySequence::New);
-    newAct->setStatusTip(tr("Create a new file"));*/
     connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(open_file()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save_file()));
 
     refreshFoodList();
 }
 
-void FGmain::refreshFoodList()
+void FGmain::refreshFoodList() // Refreshes ListView of the main form
 {
     if(!allDishes) return;
 
@@ -52,7 +49,7 @@ FGmain::~FGmain()
     delete ui;
 }
 
-void FGmain::on_generateButton_clicked()
+void FGmain::on_generateButton_clicked() // Generates dish schedule
 {
     int days = 10;
     QString result = "Generated dishes schedule for the next " + QString::number(days) + " days\n\n";
@@ -68,13 +65,13 @@ void FGmain::on_generateButton_clicked()
     {
         const DishChars& chars = (*allDishes)[dish_names[i]];
 
-        dish_probs[0] << chars.breakfastProb * chars.rank;
+        dish_probs[0] << chars.breakfastRank * chars.rank;
         breakSum += dish_probs[0][i];
 
-        dish_probs[1] << chars.dinnerProb * chars.rank;
+        dish_probs[1] << chars.dinnerRank * chars.rank;
         dinSum += dish_probs[1][i];
 
-        dish_probs[2] << chars.supperProb * chars.rank;
+        dish_probs[2] << chars.supperRank * chars.rank;
         supSum += dish_probs[2][i];
     }
 
@@ -96,7 +93,6 @@ void FGmain::on_generateButton_clicked()
             }
             catch(std::domain_error e) {QMessageBox::warning(NULL, "Exception", e.what());return;}
         }
-        qDebug() << rolled;
         result += ("breakfast: " + rolled[0] +
                 "\ndinner: " + rolled[1] +
                 "\nsupper: " + rolled[2] +
@@ -106,7 +102,7 @@ void FGmain::on_generateButton_clicked()
     ui->genFoodResult->setPlainText(result);
 }
 
-void FGmain::on_setButton_clicked()
+void FGmain::on_setButton_clicked() // Opens setup dialog
 {
     FoodEditor fui(*allDishes, this);
     if (fui.exec() == QDialog::Accepted)
@@ -118,14 +114,10 @@ void FGmain::on_setButton_clicked()
         {
             DishChars dish;
             dish.rank = table->item(row, 1)->text().toInt();
-            dish.breakfastProb = table->item(row, 2)->text().toFloat();
-            dish.dinnerProb = table->item(row, 3)->text().toFloat();
-            dish.supperProb = table->item(row, 4)->text().toFloat();
+            dish.breakfastRank = table->item(row, 2)->text().toInt();
+            dish.dinnerRank = table->item(row, 3)->text().toInt();
+            dish.supperRank = table->item(row, 4)->text().toInt();
             allDishes->insert(table->item(row, 0)->text(), dish);
-            qDebug() << dish.rank << ' '
-                     << dish.breakfastProb << ' '
-                     << dish.dinnerProb << ' '
-                     << dish.supperProb;
         }
 
         for (int row=0; row < list->count(); ++row)
@@ -157,10 +149,10 @@ void FGmain::open_file()
             QStringList fields = stream.readLine().split(",");
             DishChars dc;
             dc.rank = fields[1].trimmed().toInt();
-            dc.breakfastProb = fields[2].trimmed().toFloat();
-            dc.dinnerProb = fields[3].trimmed().toFloat();
-            dc.supperProb = fields[4].trimmed().toFloat();
-            dc.inList = fields[5].trimmed().toFloat();
+            dc.breakfastRank = fields[2].trimmed().toInt();
+            dc.dinnerRank = fields[3].trimmed().toInt();
+            dc.supperRank = fields[4].trimmed().toInt();
+            dc.inList = fields[5].trimmed().toInt();
             allDishes->insert(fields[0].trimmed(), dc);
         }
     file.close();
@@ -188,9 +180,9 @@ void FGmain::save_file()
             DishChars& dc = (*allDishes)[name];
             stream << name << ','
                    << dc.rank << ','
-                   << dc.breakfastProb << ','
-                   << dc.dinnerProb << ','
-                   << dc.supperProb << ','
+                   << dc.breakfastRank << ','
+                   << dc.dinnerRank << ','
+                   << dc.supperRank << ','
                    << dc.inList << ',' << endl;
         }
     file.close();
